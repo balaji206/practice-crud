@@ -1,12 +1,28 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import axios from 'axios'
+import {  useNavigate, useParams } from "react-router-dom";
 function EditBook() {
+  const navigate = useNavigate();
+  const {id} = useParams();
   const [formData, setFormData] = useState({
-    bookname: "",
-    authorname: "",
-    imageurl: "",
+    title: "",
+    author: "",
+    image: "",
   });
 
+  useEffect(()=>{
+    axios.get(`http://localhost:8000/books/${id}`)
+    .then(res=>{
+      setFormData({
+        title : res.data?.title||"",
+        author:res.data?.author||"",
+        image:res.data?.image||""
+      })
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+  },[id])
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -18,6 +34,14 @@ function EditBook() {
     e.preventDefault();
     console.log("Form submitted:", formData);
     // You can send it to your backend here using fetch or axios
+    axios.put(`http://localhost:8000/edit/${id}`,formData)
+    .then(()=>{alert('Details are updated');
+      setFormData({title:'',author:'',image:''})
+    })
+    .catch(err=>{console.log(err)
+      alert('failed to update details')
+    })
+    navigate('/')
   };
 
   return (
@@ -28,8 +52,8 @@ function EditBook() {
           <label>Book Name:</label><br />
           <input
             type="text"
-            name="bookname"
-            value={formData.bookname}
+            name="title"
+            value={formData.title}
             onChange={handleChange}
             required
           />
@@ -39,8 +63,8 @@ function EditBook() {
           <label>Author Name:</label><br />
           <input
             type="text"
-            name="authorname"
-            value={formData.authorname}
+            name="author"
+            value={formData.author}
             onChange={handleChange}
             required
           />
@@ -50,8 +74,8 @@ function EditBook() {
           <label>Image URL:</label><br />
           <input
             type="text"
-            name="imageurl"
-            value={formData.imageurl}
+            name="image"
+            value={formData.image}
             onChange={handleChange}
             required
           />
